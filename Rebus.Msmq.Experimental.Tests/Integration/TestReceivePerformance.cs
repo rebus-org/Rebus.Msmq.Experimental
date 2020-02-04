@@ -12,7 +12,7 @@ using Rebus.Tests.Contracts;
 
 #pragma warning disable 1998
 
-namespace Rebus.Msmq.Tests.Integration
+namespace Rebus.Msmq.Experimental.Tests.Integration
 {
     [TestFixture]
     public class TestReceivePerformance : FixtureBase

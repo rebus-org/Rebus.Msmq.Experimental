@@ -1,6 +1,7 @@
 ﻿using System;
 using Rebus.Logging;
 using Rebus.Msmq;
+using Rebus.Msmq.Experimental;
 using Rebus.Transport;
 // ReSharper disable UnusedMember.Global
 

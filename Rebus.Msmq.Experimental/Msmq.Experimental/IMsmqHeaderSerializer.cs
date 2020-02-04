@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Experimental.System.Messaging;
 
-namespace Rebus.Msmq
+namespace Rebus.Msmq.Experimental
 {
     /// <summary>
     /// Interface for msmq header serialization

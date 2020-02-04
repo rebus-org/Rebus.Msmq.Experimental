@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Experimental.System.Messaging;
 using Rebus.Msmq;
+using Rebus.Msmq.Experimental;
 
 namespace Rebus.Config
 {

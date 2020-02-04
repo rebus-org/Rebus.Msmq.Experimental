@@ -5,7 +5,7 @@ using Rebus.Logging;
 using Rebus.Tests.Contracts;
 using Rebus.Transport;
 
-namespace Rebus.Msmq.Tests.Bugs
+namespace Rebus.Msmq.Experimental.Tests.Bugs
 {
     [TestFixture]
     public class TestReceiveFromErrorQueue : FixtureBase

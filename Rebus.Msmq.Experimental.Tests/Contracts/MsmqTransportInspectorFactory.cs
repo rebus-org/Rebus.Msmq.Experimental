@@ -1,7 +1,7 @@
 ﻿using Rebus.Logging;
 using Rebus.Tests.Contracts.Transports;
 
-namespace Rebus.Msmq.Tests.Contracts
+namespace Rebus.Msmq.Experimental.Tests.Contracts
 {
     public class MsmqTransportInspectorFactory : ITransportInspectorFactory
     {

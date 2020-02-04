@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Experimental.System.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
+using Experimental.System.Messaging;
 using Rebus.Bus;
 using Rebus.Exceptions;
 using Rebus.Extensions;
@@ -16,7 +16,7 @@ using Message = Experimental.System.Messaging.Message;
 
 #pragma warning disable 1998
 
-namespace Rebus.Msmq
+namespace Rebus.Msmq.Experimental
 {
     /// <summary>
     /// Implementation of <see cref="ITransport"/> that uses MSMQ to do its thing

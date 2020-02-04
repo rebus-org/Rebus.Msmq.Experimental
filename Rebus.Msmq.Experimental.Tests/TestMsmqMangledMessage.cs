@@ -1,12 +1,12 @@
-﻿using Experimental.System.Messaging;
-using System.Text;
+﻿using System.Text;
 using System.Threading;
+using Experimental.System.Messaging;
 using NUnit.Framework;
 using Rebus.Activation;
 using Rebus.Config;
 using Rebus.Tests.Contracts;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Experimental.Tests
 {
     [TestFixture]
     [Description("Verify sane behavior when a mangled (possibly non-Rebus) message is received")]

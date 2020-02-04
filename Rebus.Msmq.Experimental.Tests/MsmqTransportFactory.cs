@@ -5,7 +5,7 @@ using Rebus.Logging;
 using Rebus.Tests.Contracts.Transports;
 using Rebus.Transport;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Experimental.Tests
 {
     public class MsmqTransportFactory : ITransportFactory
     {

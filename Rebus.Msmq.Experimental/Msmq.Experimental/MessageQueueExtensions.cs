@@ -1,8 +1,8 @@
 ﻿using System;
-using Experimental.System.Messaging;
 using System.Runtime.InteropServices;
+using Experimental.System.Messaging;
 
-namespace Rebus.Msmq
+namespace Rebus.Msmq.Experimental
 {
     /// <summary>
     /// http://functionalflow.co.uk/blog/2008/08/27/counting-the-number-of-messages-in-a-message-queue-in/

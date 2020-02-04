@@ -6,7 +6,7 @@ using Rebus.Activation;
 using Rebus.Config;
 using Rebus.Tests.Contracts;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Experimental.Tests
 {
     [TestFixture]
     public class MsmqShutdownTime : FixtureBase

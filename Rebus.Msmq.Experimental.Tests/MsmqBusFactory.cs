@@ -7,7 +7,7 @@ using Rebus.Config;
 using Rebus.Tests.Contracts;
 using Rebus.Tests.Contracts.Transports;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Experimental.Tests
 {
     public class MsmqBusFactory : IBusFactory
     {

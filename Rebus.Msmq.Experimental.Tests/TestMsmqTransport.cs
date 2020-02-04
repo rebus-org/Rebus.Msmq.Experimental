@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Experimental.System.Messaging;
 using System.Text;
 using System.Threading;
+using Experimental.System.Messaging;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Rebus.Extensions;
@@ -15,7 +15,7 @@ using Rebus.Tests.Contracts.Extensions;
 using Rebus.Transport;
 using Timer = System.Timers.Timer;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Experimental.Tests
 {
     [TestFixture]
     [Ignore("not an actual test")]

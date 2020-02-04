@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Linq;
 using Experimental.System.Messaging;
-using System.Security.Principal;
-using System.Threading;
 using Rebus.Exceptions;
 using Rebus.Logging;
 
-namespace Rebus.Msmq
+namespace Rebus.Msmq.Experimental
 {
     /// <summary>
     /// Utils class for various MSMQ operations

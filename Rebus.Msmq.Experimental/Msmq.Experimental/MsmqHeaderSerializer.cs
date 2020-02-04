@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using Experimental.System.Messaging;
 using System.Text;
+using Experimental.System.Messaging;
 using Rebus.Serialization;
 
-namespace Rebus.Msmq
+namespace Rebus.Msmq.Experimental
 {
     /// <summary>
     /// Header serializer based on extension

@@ -7,7 +7,7 @@ using Rebus.Messages;
 using Rebus.Tests.Contracts;
 using Rebus.Transport;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Experimental.Tests
 {
     [TestFixture]
     public class TestMsmqUtil : FixtureBase

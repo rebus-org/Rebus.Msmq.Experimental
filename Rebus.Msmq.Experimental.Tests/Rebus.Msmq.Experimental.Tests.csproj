@@ -3,8 +3,8 @@
  <PropertyGroup>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Rebus.Msmq.Tests</RootNamespace>
-    <AssemblyName>Rebus.Msmq.Tests</AssemblyName>
+    <RootNamespace>Rebus.Msmq.Experimental.Tests</RootNamespace>
+    <AssemblyName>Rebus.Msmq.Experimental.Tests</AssemblyName>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
@@ -27,7 +27,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Messaging" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
     <PackageReference Include="rebus.tests.contracts" Version="5.2.0" />

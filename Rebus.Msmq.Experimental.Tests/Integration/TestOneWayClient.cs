@@ -11,7 +11,7 @@ using Rebus.Tests.Contracts.Extensions;
 
 #pragma warning disable 1998
 
-namespace Rebus.Msmq.Tests.Integration
+namespace Rebus.Msmq.Experimental.Tests.Integration
 {
     [TestFixture]
     public class TestOneWayClient : FixtureBase

@@ -2,9 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Rebus.Transport;
+
 #pragma warning disable 1998
 
-namespace Rebus.Msmq
+namespace Rebus.Msmq.Experimental
 {
     class MsmqTransportInspector : ITransportInspector
     {

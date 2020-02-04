@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Experimental.System.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Experimental.System.Messaging;
 using NUnit.Framework;
 using Rebus.Activation;
 using Rebus.Config;
@@ -12,7 +12,7 @@ using Rebus.Serialization;
 using Rebus.Tests.Contracts;
 using Message = Experimental.System.Messaging.Message;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Experimental.Tests
 {
     [TestFixture]
     [Description("Verify that serializer can ignore mangled message")]

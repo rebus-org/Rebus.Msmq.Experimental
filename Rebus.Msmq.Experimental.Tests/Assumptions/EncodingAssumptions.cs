@@ -4,7 +4,7 @@ using System.Text;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace Rebus.Msmq.Tests.Assumptions
+namespace Rebus.Msmq.Experimental.Tests.Assumptions
 {
     [TestFixture]
     public class EncodingAssumptions

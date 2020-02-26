@@ -43,7 +43,11 @@ namespace Rebus.Msmq.Experimental.Tests
             _disposables.ForEach(d => d.Dispose());
             _disposables.Clear();
 
-            _queuesToDelete.ForEach(MsmqUtil.Delete);
+            foreach (var queue in _queuesToDelete)
+            {
+                MsmqUtil.Delete(queue);
+            }
+            
             _queuesToDelete.Clear();
         }
     }

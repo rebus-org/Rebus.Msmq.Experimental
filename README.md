@@ -1,8 +1,8 @@
 ﻿# Rebus.Msmq.Experimental
 
-[![install from nuget](https://img.shields.io/nuget/v/Rebus.Msmq.Experimental.svg?style=flat-square)](https://www.nuget.org/packages/Rebus.Msmq)
+[![install from nuget](https://img.shields.io/nuget/v/Rebus.Msmq.Experimental.svg?style=flat-square)](https://www.nuget.org/packages/Rebus.Msmq.Experimental)
 
-Provides a Microsoft Message Queue transport for [Rebus](https://github.com/rebus-org/Rebus).
+Provides a Microsoft Message Queue transport for [Rebus](https://github.com/rebus-org/Rebus) based on the [Experimental.System.Messaging](https://www.nuget.org/packages/Experimental.System.Messaging/) NuGet package.
 
 ![](https://raw.githubusercontent.com/rebus-org/Rebus/master/artwork/little_rebusbus2_copy-200x200.png)
 

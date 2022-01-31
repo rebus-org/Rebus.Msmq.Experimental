@@ -1,10 +1,9 @@
 ﻿using NUnit.Framework;
 using Rebus.Tests.Contracts.Transports;
 
-namespace Rebus.Msmq.Experimental.Tests.Contracts
+namespace Rebus.Msmq.Experimental.Tests.Contracts;
+
+[TestFixture]
+public class MsmqTransportInspectorTest : TransportInspectorTest<MsmqTransportInspectorFactory>
 {
-    [TestFixture]
-    public class MsmqTransportInspectorTest : TransportInspectorTest<MsmqTransportInspectorFactory>
-    {
-    }
 }

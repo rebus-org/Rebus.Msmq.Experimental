@@ -1,34 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
- <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Rebus</RootNamespace>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <Authors>mookid8000</Authors>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/rebus-org/Rebus/master/LICENSE.md</PackageLicenseUrl>
-    <PackageProjectUrl>https://rebus.fm/what-is-rebus/</PackageProjectUrl>
-    <Copyright>Copyright 2012</Copyright>
-    <PackageTags>rebus msmq</PackageTags>
-    <PackageDescription>Provides an MSMQ transport for Rebus</PackageDescription>
-    <PackageIconUrl>https://github.com/mookid8000/Rebus/raw/master/artwork/little_rebusbus2_copy-200x200.png</PackageIconUrl>
-    <RepositoryUrl>https://github.com/rebus-org/Rebus.Msmq</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\Rebus.Msmq.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="experimental.system.messaging" Version="1.1.0" />
-    <PackageReference Include="rebus" Version="6.0.0" />
-  </ItemGroup>
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<RootNamespace>Rebus</RootNamespace>
+		<LangVersion>10</LangVersion>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<Authors>mookid8000</Authors>
+		<PackageProjectUrl>https://rebus.fm/what-is-rebus/</PackageProjectUrl>
+		<Copyright>Copyright 2012</Copyright>
+		<PackageTags>rebus msmq</PackageTags>
+		<PackageDescription>Provides an MSMQ transport for Rebus</PackageDescription>
+		<PackageIconUrl>https://github.com/mookid8000/Rebus/raw/master/artwork/little_rebusbus2_copy-200x200.png</PackageIconUrl>
+		<RepositoryUrl>https://github.com/rebus-org/Rebus.Msmq</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+	<PropertyGroup>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<PackageIcon>little_rebusbus2_copy-500x500.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
+	<ItemGroup>
+	  <None Include="..\artwork\little_rebusbus2_copy-500x500.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="experimental.system.messaging" Version="1.1.0" />
+		<PackageReference Include="rebus" Version="6.0.0" />
+	</ItemGroup>
 </Project>

@@ -21,10 +21,9 @@ public static class MsmqUtil
 
         if (!MessageQueue.Exists(path)) return;
 
-        using (var messageQueue = new MessageQueue(path))
-        {
-            messageQueue.Purge();
-        }
+        using var messageQueue = new MessageQueue(path);
+        
+        messageQueue.Purge();
     }
 
     /// <summary>
@@ -189,11 +188,11 @@ in order to specify a private queue named 'someQueue' on the machine with IP 10.
     /// </summary>
     public static void EnsureMessageQueueIsTransactional(string path)
     {
-        using (var queue = new MessageQueue(path))
-        {
-            if (queue.Transactional) return;
+        using var queue = new MessageQueue(path);
+        
+        if (queue.Transactional) return;
 
-            var message = $@"The queue {path} is NOT transactional!
+        var message = $@"The queue {path} is NOT transactional!
 
 Everything around Rebus is built with the assumption that queues are transactional, so Rebus will malfunction if queues aren't transactional. 
 
@@ -201,8 +200,7 @@ To remedy this, ensure that any existing queues are transactional, or let Rebus 
 
 If Rebus allowed you to work with non-transactional queues, it would not be able to e.g. safely move a received message into an error queue. Also, MSMQ does not behave well when moving messages in/out of transactional/non-transactional queues - the messages will end up in the dead-letter queue.";
 
-            throw new RebusApplicationException(message);
-        }
+        throw new RebusApplicationException(message);
     }
 
     /// <summary>
@@ -222,10 +220,9 @@ If Rebus allowed you to work with non-transactional queues, it would not be able
     /// </summary>
     public static int GetCount(string path)
     {
-        using (var queue = new MessageQueue(path))
-        {
-            return GetCount(queue);
-        }
+        using var queue = new MessageQueue(path);
+        
+        return GetCount(queue);
 
         //return (int)MessageQueueExtensions.GetCount(path);
     }
@@ -236,12 +233,11 @@ If Rebus allowed you to work with non-transactional queues, it would not be able
         {
             var count = 0;
 
-            using (var enumerator = queue.GetMessageEnumerator2())
-            {
-                while (enumerator.MoveNext()) count++;
+            using var enumerator = queue.GetMessageEnumerator2();
+            
+            while (enumerator.MoveNext()) count++;
 
-                return count;
-            }
+            return count;
         }
         catch
         {

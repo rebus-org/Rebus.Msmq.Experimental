@@ -19,12 +19,14 @@ public class MsmqTransportConfigurationBuilder
     /// </summary>
     public MsmqTransportConfigurationBuilder OnCreated(Action<MessageQueue> callback)
     {
+        if (callback == null) throw new ArgumentNullException(nameof(callback));
         _onCreatedCallbacks.Add(callback);
         return this;
     }
 
     internal void Configure(MsmqTransport transport)
     {
+        if (transport == null) throw new ArgumentNullException(nameof(transport));
         _onCreatedCallbacks.ForEach(transport.AddQueueCallback);
     }
 }

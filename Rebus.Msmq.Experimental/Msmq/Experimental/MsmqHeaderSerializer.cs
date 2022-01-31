@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Experimental.System.Messaging;
 using Rebus.Serialization;
@@ -17,6 +18,8 @@ public class ExtensionHeaderSerializer : IMsmqHeaderSerializer
     /// </summary>
     public void SerializeToMessage(Dictionary<string, string> headers, Message msmqMessage)
     {
+        if (headers == null) throw new ArgumentNullException(nameof(headers));
+        if (msmqMessage == null) throw new ArgumentNullException(nameof(msmqMessage));
         msmqMessage.Extension = _utf8HeaderSerializer.Serialize(headers);
     }
 
@@ -25,6 +28,7 @@ public class ExtensionHeaderSerializer : IMsmqHeaderSerializer
     /// </summary>
     public Dictionary<string, string> Deserialize(Message msmqMessage)
     {
+        if (msmqMessage == null) throw new ArgumentNullException(nameof(msmqMessage));
         return _utf8HeaderSerializer.Deserialize(msmqMessage.Extension);
     }
 }

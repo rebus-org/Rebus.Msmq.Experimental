@@ -139,7 +139,7 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
 
             transaction.Begin();
 
-            context.OnCommitted(async ctx => transaction.Commit());
+            context.OnCommitted(async _ => transaction.Commit());
 
             return transaction;
         });
@@ -148,7 +148,7 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
         {
             var messageQueues = new ConcurrentDictionary<string, MessageQueue>(StringComparer.InvariantCultureIgnoreCase);
 
-            context.OnDisposed(ctx =>
+            context.OnDisposed(_ =>
             {
                 foreach (var messageQueue in messageQueues.Values)
                 {
@@ -201,7 +201,7 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
         var messageQueueTransaction = new MessageQueueTransaction();
         messageQueueTransaction.Begin();
 
-        context.OnDisposed(ctx => messageQueueTransaction.Dispose());
+        context.OnDisposed(_ => messageQueueTransaction.Dispose());
         context.Items[CurrentTransactionKey] = messageQueueTransaction;
 
         try
@@ -214,15 +214,16 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
                 return null;
             }
 
-            context.OnCompleted(async ctx => messageQueueTransaction.Commit());
-            context.OnDisposed(ctx => message.Dispose());
+            context.OnCompleted(async _ => messageQueueTransaction.Commit());
+            context.OnDisposed(_ => message.Dispose());
 
             var headers = _msmqHeaderSerializer.Deserialize(message) ?? new Dictionary<string, string>();
-            var body = new byte[message.BodyStream.Length];
+            
+            using var memoryStream = new MemoryStream();
+            
+            await message.BodyStream.CopyToAsync(memoryStream);
 
-            await message.BodyStream.ReadAsync(body, 0, body.Length, cancellationToken);
-
-            return new TransportMessage(headers, body);
+            return new TransportMessage(headers, memoryStream.ToArray());
         }
         catch (MessageQueueException exception)
         {

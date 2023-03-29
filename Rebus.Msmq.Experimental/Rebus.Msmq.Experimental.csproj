@@ -1,9 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<RootNamespace>Rebus</RootNamespace>
-		<LangVersion>10</LangVersion>
+		<LangVersion>11</LangVersion>
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<Authors>mookid8000</Authors>
 		<PackageProjectUrl>https://rebus.fm/what-is-rebus/</PackageProjectUrl>
@@ -32,6 +31,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="experimental.system.messaging" Version="1.1.0" />
-		<PackageReference Include="rebus" Version="6.0.0" />
+		<PackageReference Include="rebus" Version="8.0.0-alpha01" />
 	</ItemGroup>
 </Project>

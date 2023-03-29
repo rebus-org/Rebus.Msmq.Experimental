@@ -139,7 +139,8 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
 
             transaction.Begin();
 
-            context.OnCommitted(async _ => transaction.Commit());
+            context.OnCommit(async _ => transaction.Commit());
+            context.OnRollback(async _ => transaction.Abort());
 
             return transaction;
         });
@@ -214,16 +215,17 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
                 return null;
             }
 
-            context.OnCompleted(async _ => messageQueueTransaction.Commit());
+            context.OnAck(async _ => messageQueueTransaction.Commit());
+            context.OnNack(async _ => messageQueueTransaction.Abort());
             context.OnDisposed(_ => message.Dispose());
 
             var headers = _msmqHeaderSerializer.Deserialize(message) ?? new Dictionary<string, string>();
 
-            using var memoryStream = new MemoryStream();
+            using var target = new MemoryStream();
 
-            await message.BodyStream.CopyToAsync(memoryStream);
+            await message.BodyStream.CopyToAsync(target);
 
-            return new TransportMessage(headers, memoryStream.ToArray());
+            return new TransportMessage(headers, target.ToArray());
         }
         catch (MessageQueueException exception)
         {

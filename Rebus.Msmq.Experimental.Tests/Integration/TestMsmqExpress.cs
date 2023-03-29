@@ -19,7 +19,7 @@ namespace Rebus.Msmq.Experimental.Tests.Integration;
 public class TestMsmqExpress : FixtureBase
 {
     BuiltinHandlerActivator _activator;
-    IBus _bus;
+    IBusStarter _starter;
 
     protected override void SetUp()
     {
@@ -29,11 +29,11 @@ public class TestMsmqExpress : FixtureBase
 
         _activator = Using(new BuiltinHandlerActivator());
 
-        _bus = Configure.With(_activator)
+        _starter = Configure.With(_activator)
             .Logging(l => l.ColoredConsole(LogLevel.Info))
             .Transport(t => t.UseMsmq(queueName))
             .Options(o => o.SetMaxParallelism(100))
-            .Start();
+            .Create();
     }
 
     [TestCase(10000, true, Ignore = "takes a long time")]
@@ -45,15 +45,17 @@ public class TestMsmqExpress : FixtureBase
         var receivedMessages = 0L;
         _activator.Handle<object>(async msg => Interlocked.Increment(ref receivedMessages));
 
-        _bus.Advanced.Workers.SetNumberOfWorkers(0);
+        var bus = _starter.Start();
+
+        bus.Advanced.Workers.SetNumberOfWorkers(0);
 
         await Task.WhenAll(Enumerable.Range(0, messageCount)
             .Select(i => express ? (object)new ExpressMessage() : new NormalMessage())
-            .Select(msg => _bus.SendLocal(msg)));
+            .Select(msg => bus.SendLocal(msg)));
 
         var stopwatch = Stopwatch.StartNew();
 
-        _bus.Advanced.Workers.SetNumberOfWorkers(5);
+        bus.Advanced.Workers.SetNumberOfWorkers(5);
 
         while (Interlocked.Read(ref receivedMessages) < messageCount)
         {

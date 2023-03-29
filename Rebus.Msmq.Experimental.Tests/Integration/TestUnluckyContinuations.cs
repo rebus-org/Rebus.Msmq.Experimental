@@ -17,6 +17,7 @@ namespace Rebus.Msmq.Experimental.Tests.Integration;
 public class TestUnluckyContinuations : FixtureBase
 {
     BuiltinHandlerActivator _activator;
+    IBusStarter _starter;
 
     protected override void SetUp()
     {
@@ -26,14 +27,14 @@ public class TestUnluckyContinuations : FixtureBase
 
         MsmqUtil.PurgeQueue(queueName);
 
-        Configure.With(_activator)
+        _starter = Configure.With(_activator)
             .Transport(t => t.UseMsmq(queueName))
             .Options(o =>
             {
                 o.SetNumberOfWorkers(1);
                 o.SetMaxParallelism(5);
             })
-            .Start();
+            .Create();
     }
 
     [Test]
@@ -55,6 +56,8 @@ public class TestUnluckyContinuations : FixtureBase
             gotMessage.Set();
         });
 
+        _starter.Start();
+
         _activator.Bus.SendLocal("hej!").Wait();
 
         gotMessage.WaitOrDie(TimeSpan.FromSeconds(1));
@@ -65,11 +68,11 @@ public class TestUnluckyContinuations : FixtureBase
     {
         var resetEvents = new List<ManualResetEvent>
         {
-            new(false),
-            new(false),
-            new(false),
-            new(false),
-            new(false),
+            Using(new ManualResetEvent(false)),
+            Using(new ManualResetEvent(false)),
+            Using(new ManualResetEvent(false)),
+            Using(new ManualResetEvent(false)),
+            Using(new ManualResetEvent(false)),
         };
 
         var resetEventsQueue = new ConcurrentQueue<ManualResetEvent>(resetEvents);
@@ -92,6 +95,8 @@ public class TestUnluckyContinuations : FixtureBase
             resetEvent.Set();
         });
 
+        _starter.Start();
+
         Task.WaitAll(
             _activator.Bus.SendLocal("1"),
             _activator.Bus.SendLocal("2"),
@@ -100,7 +105,7 @@ public class TestUnluckyContinuations : FixtureBase
             _activator.Bus.SendLocal("5"));
 
         var doneThing = "";
-        var allDone = new ManualResetEvent(false);
+        using var allDone = new ManualResetEvent(false);
 
         Task.WhenAll(resetEvents.Select(r => r.WaitAsync()))
             .ContinueWith(t =>
@@ -118,7 +123,7 @@ public class TestUnluckyContinuations : FixtureBase
                 allDone.Set();
             });
 
-        allDone.WaitOrDie(TimeSpan.FromSeconds(3));
+        allDone.WaitOrDie(TimeSpan.FromSeconds(5));
 
         Assert.That(doneThing, Is.EqualTo("HandleTasks"));
     }

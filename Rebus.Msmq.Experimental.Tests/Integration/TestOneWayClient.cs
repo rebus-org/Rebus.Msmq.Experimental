@@ -19,6 +19,7 @@ public class TestOneWayClient : FixtureBase
     BuiltinHandlerActivator _server;
     string _serverInputQueueName;
     IBus _client;
+    IBusStarter _serverStarter;
 
     protected override void SetUp()
     {
@@ -26,9 +27,9 @@ public class TestOneWayClient : FixtureBase
             
         _server = Using(new BuiltinHandlerActivator());
 
-        Configure.With(_server)
+        _serverStarter = Configure.With(_server)
             .Transport(t => t.UseMsmq(_serverInputQueueName))
-            .Start();
+            .Create();
 
         _client = Configure.With(Using(new BuiltinHandlerActivator()))
             .Transport(t => t.UseMsmqAsOneWayClient())
@@ -46,6 +47,8 @@ public class TestOneWayClient : FixtureBase
             Console.WriteLine($"Got string: {str}");
             gotIt.Set();
         });
+
+        _serverStarter.Start();
 
         await _client.Send("w000000h000000!!!!1111");
 

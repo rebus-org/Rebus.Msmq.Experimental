@@ -8,3 +8,6 @@
 
 ## 2.1.0
 * Fix structured logging
+
+## 3.0.0-alpha01
+* Update to Rebus 8

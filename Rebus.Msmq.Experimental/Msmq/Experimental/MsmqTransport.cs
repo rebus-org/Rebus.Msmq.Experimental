@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Experimental.System.Messaging;
@@ -11,6 +12,7 @@ using Rebus.Exceptions;
 using Rebus.Extensions;
 using Rebus.Logging;
 using Rebus.Messages;
+using Rebus.Pipeline.Send;
 using Rebus.Transport;
 using Message = Experimental.System.Messaging.Message;
 
@@ -21,13 +23,12 @@ namespace Rebus.Msmq.Experimental;
 /// <summary>
 /// Implementation of <see cref="ITransport"/> that uses MSMQ to do its thing
 /// </summary>
-public class MsmqTransport : ITransport, IInitializable, IDisposable
+public class MsmqTransport : AbstractRebusTransport, IInitializable, IDisposable
 {
     const string CurrentTransactionKey = "msmqtransport-messagequeuetransaction";
     const string CurrentOutgoingQueuesKey = "msmqtransport-outgoing-messagequeues";
     readonly List<Action<MessageQueue>> _newQueueCallbacks = new();
     readonly IMsmqHeaderSerializer _msmqHeaderSerializer;
-    readonly string _inputQueueName;
     readonly ILog _log;
 
     volatile MessageQueue _inputQueue;
@@ -36,18 +37,14 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
     /// <summary>
     /// Constructs the transport with the specified input queue address
     /// </summary>
-    public MsmqTransport(string inputQueueAddress, IRebusLoggerFactory rebusLoggerFactory, IMsmqHeaderSerializer msmqHeaderSerializer)
+    public MsmqTransport(string inputQueueAddress, IRebusLoggerFactory rebusLoggerFactory, IMsmqHeaderSerializer msmqHeaderSerializer) : base(MakeGloballyAddressable(inputQueueAddress))
     {
         if (rebusLoggerFactory == null) throw new ArgumentNullException(nameof(rebusLoggerFactory));
         _msmqHeaderSerializer = msmqHeaderSerializer ?? throw new ArgumentNullException(nameof(msmqHeaderSerializer));
-
         _log = rebusLoggerFactory.GetLogger<MsmqTransport>();
-
-        if (inputQueueAddress != null)
-        {
-            _inputQueueName = MakeGloballyAddressable(inputQueueAddress);
-        }
     }
+
+    static string MakeGloballyAddressable(string inputQueueName) => inputQueueName == null ? null : inputQueueName.Contains("@") ? inputQueueName : $"{inputQueueName}@{Environment.MachineName}";
 
     /// <summary>
     /// Adds a callback to be invoked when a new queue is created. Can be used e.g. to customize permissions
@@ -57,21 +54,14 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
         _newQueueCallbacks.Add(callback);
     }
 
-    static string MakeGloballyAddressable(string inputQueueName)
-    {
-        return inputQueueName.Contains("@")
-            ? inputQueueName
-            : $"{inputQueueName}@{Environment.MachineName}";
-    }
-
     /// <summary>
     /// Initializes the transport by creating the input queue
     /// </summary>
     public void Initialize()
     {
-        if (_inputQueueName != null)
+        if (Address != null)
         {
-            _log.Info("Initializing MSMQ transport - input queue: {queueName}", _inputQueueName);
+            _log.Info("Initializing MSMQ transport - input queue: {queueName}", Address);
 
             GetInputQueue();
         }
@@ -85,7 +75,7 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
     /// Creates a queue with the given address, unless the address is of a remote queue - in that case,
     /// this call is ignored
     /// </summary>
-    public void CreateQueue(string address)
+    public override void CreateQueue(string address)
     {
         if (!MsmqUtil.IsLocal(address)) return;
 
@@ -111,86 +101,64 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
     /// </summary>
     public void PurgeInputQueue()
     {
-        if (!MsmqUtil.QueueExists(_inputQueueName))
+        if (!MsmqUtil.QueueExists(Address))
         {
-            _log.Info("Purging {queueName} (but the queue doesn't exist...)", _inputQueueName);
+            _log.Info("Purging {queueName} (but the queue doesn't exist...)", Address);
             return;
         }
 
-        _log.Info("Purging {queueName}", _inputQueueName);
-        MsmqUtil.PurgeQueue(_inputQueueName);
+        _log.Info("Purging {queueName}", Address);
+        MsmqUtil.PurgeQueue(Address);
     }
 
-    /// <summary>
-    /// Sends the given transport message to the specified destination address using MSMQ. Will use the existing <see cref="MessageQueueTransaction"/> stashed
-    /// under the <see cref="CurrentTransactionKey"/> key in the given <paramref name="context"/>, or else it will create one and add it.
-    /// </summary>
-    public async Task Send(string destinationAddress, TransportMessage message, ITransactionContext context)
+    protected override async Task SendOutgoingMessages(IEnumerable<OutgoingTransportMessage> outgoingMessages, ITransactionContext context)
     {
-        if (destinationAddress == null) throw new ArgumentNullException(nameof(destinationAddress));
-        if (message == null) throw new ArgumentNullException(nameof(message));
-        if (context == null) throw new ArgumentNullException(nameof(context));
-
-        var logicalMessage = CreateMsmqMessage(message);
-
-        var messageQueueTransaction = context.GetOrAdd(CurrentTransactionKey, () =>
+        // if the transaction context has a message queue transaction, we're being called in a Rebus handler, so we just send all the outgoing messages using that
+        if (context.Items.TryGetValue(CurrentTransactionKey, out var result)
+            && result is MessageQueueTransaction messageQueueTransaction)
         {
-            var transaction = new MessageQueueTransaction();
-
-            transaction.Begin();
-
-            context.OnCommit(async _ => transaction.Commit());
-            context.OnRollback(async _ => transaction.Abort());
-
-            return transaction;
-        });
-
-        var sendQueues = context.GetOrAdd(CurrentOutgoingQueuesKey, () =>
-        {
-            var messageQueues = new ConcurrentDictionary<string, MessageQueue>(StringComparer.InvariantCultureIgnoreCase);
-
-            context.OnDisposed(_ =>
-            {
-                foreach (var messageQueue in messageQueues.Values)
-                {
-                    messageQueue.Dispose();
-                }
-            });
-
-            return messageQueues;
-        });
-
-        var path = MsmqUtil.GetFullPath(destinationAddress);
-
-        var sendQueue = sendQueues.GetOrAdd(path, _ =>
-        {
-            var messageQueue = new MessageQueue(path, QueueAccessMode.Send);
-
-            return messageQueue;
-        });
-
-        try
-        {
-            sendQueue.Send(logicalMessage, messageQueueTransaction);
+            SendOutgoingMessagesWithThis(messageQueueTransaction);
         }
-        catch (Exception exception)
+        else
         {
-            throw new RebusApplicationException(exception, $"Could not send to MSMQ queue with path '{sendQueue.Path}'");
+            //otherwise, we're sending messages outside of a Rebus handler, so the easiest way to send the stuff is like this
+            using var newMessageQueueTransaction = new MessageQueueTransaction();
+
+            newMessageQueueTransaction.Begin();
+            
+            SendOutgoingMessagesWithThis(newMessageQueueTransaction);
+            
+            newMessageQueueTransaction.Commit();
+        }
+
+        void SendOutgoingMessagesWithThis(MessageQueueTransaction transaction)
+        {
+            foreach (var messagesByDestination in outgoingMessages.GroupBy(g => g.DestinationAddress))
+            {
+                var destinationQueueName = messagesByDestination.Key;
+                var path = MsmqUtil.GetFullPath(destinationQueueName);
+
+                using var queue = new MessageQueue(path, QueueAccessMode.Send);
+
+                foreach (var message in messagesByDestination)
+                {
+                    var logicalMessage = CreateMsmqMessage(message.TransportMessage);
+
+                    queue.Send(logicalMessage, transaction);
+                }
+            }
         }
     }
 
     /// <summary>
-    /// Received the next available transport message from the input queue via MSMQ. Will create a new <see cref="MessageQueueTransaction"/> and stash
+    /// Receives the next available transport message from the input queue via MSMQ. Will create a new <see cref="MessageQueueTransaction"/> and stash
     /// it under the <see cref="CurrentTransactionKey"/> key in the given <paramref name="context"/>. If one already exists, an exception will be thrown
     /// (because we should never have to receive multiple messages in the same transaction)
     /// </summary>
-    public async Task<TransportMessage> Receive(ITransactionContext context, CancellationToken cancellationToken)
+    public override async Task<TransportMessage> Receive(ITransactionContext context, CancellationToken cancellationToken)
     {
         if (context == null) throw new ArgumentNullException(nameof(context));
-        if (_inputQueueName == null)
-        {
-            throw new InvalidOperationException("This MSMQ transport does not have an input queue, hence it is not possible to reveive anything");
-        }
+        if (Address == null) throw new InvalidOperationException("This MSMQ transport does not have an input queue, which indicates that it was configured as the transport for a one-way client. It is not possible to reveive anything with it.");
 
         var queue = GetInputQueue();
 
@@ -236,18 +204,18 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
 
             if (exception.MessageQueueErrorCode == MessageQueueErrorCode.InvalidHandle)
             {
-                _log.Warn("Queue handle for {queueName} was invalid - will try to reinitialize the queue", _inputQueueName);
+                _log.Warn("Queue handle for {queueName} was invalid - will try to reinitialize the queue", Address);
                 ReinitializeInputQueue();
                 return null;
             }
 
             if (exception.MessageQueueErrorCode == MessageQueueErrorCode.QueueDeleted)
             {
-                _log.Warn("Queue {queueName} was deleted - will not receive any more messages", _inputQueueName);
+                _log.Warn("Queue {queueName} was deleted - will not receive any more messages", Address);
                 return null;
             }
 
-            throw new IOException($"Could not receive next message from MSMQ queue '{_inputQueueName}'", exception);
+            throw new IOException($"Could not receive next message from MSMQ queue '{Address}'", exception);
         }
     }
 
@@ -292,11 +260,6 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
         }
     }
 
-    /// <summary>
-    /// Gets the input queue address of this MSMQ queue
-    /// </summary>
-    public string Address => _inputQueueName;
-
     void ReinitializeInputQueue()
     {
         if (_inputQueue != null)
@@ -308,7 +271,7 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
             }
             catch (Exception exception)
             {
-                _log.Warn(exception, "An error occurred when closing/disposing the queue handle for {queueName}", _inputQueueName);
+                _log.Warn(exception, "An error occurred when closing/disposing the queue handle for {queueName}", Address);
             }
             finally
             {
@@ -329,7 +292,7 @@ public class MsmqTransport : ITransport, IInitializable, IDisposable
         {
             if (_inputQueue != null) return _inputQueue;
 
-            var inputQueuePath = MsmqUtil.GetPath(_inputQueueName);
+            var inputQueuePath = MsmqUtil.GetPath(Address);
 
             if (_newQueueCallbacks.Any())
             {

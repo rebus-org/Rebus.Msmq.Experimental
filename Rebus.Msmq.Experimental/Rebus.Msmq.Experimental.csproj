@@ -30,6 +30,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="experimental.system.messaging" Version="1.1.0" />
-		<PackageReference Include="rebus" Version="8.0.0-alpha11" />
+		<PackageReference Include="rebus" Version="8.0.1" />
 	</ItemGroup>
 </Project>

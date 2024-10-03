@@ -1,5 +1,8 @@
 ﻿# Rebus.Msmq.Experimental
 
+⚠ DEPRECATED because the underlying port of System.Messaging lacked functionality around assigning queue permissions.
+REPLACEMENT: Use 👉 [Rebus.Msmq.Messaging](https://github.com/rebus-org/Rebus.Msmq.Messaging) 👈 instead! 🙂
+
 [![install from nuget](https://img.shields.io/nuget/v/Rebus.Msmq.Experimental.svg?style=flat-square)](https://www.nuget.org/packages/Rebus.Msmq.Experimental)
 
 Provides a Microsoft Message Queue transport for [Rebus](https://github.com/rebus-org/Rebus) based on the [Experimental.System.Messaging](https://www.nuget.org/packages/Experimental.System.Messaging/) NuGet package.
